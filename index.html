@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VOXIA — Assistant Vocal</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="background">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+        <div class="grid"></div>
+    </div>
+
+    <main class="app">
+
+        <!-- HEADER -->
+
+        <header class="header">
+
+            <div class="logo-area">
+
+                <div class="logo">
+                    ✦
+                </div>
+
+                <div>
+                    <h1>VOXIA</h1>
+                    <p>Assistant vocal intelligent</p>
+                </div>
+
+            </div>
+
+            <div class="header-buttons">
+
+                <button id="themeButton" class="icon-button">
+                    🌙
+                </button>
+
+                <button id="settingsButton" class="icon-button">
+                    ⚙️
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <div class="ready">
+                ● SYSTÈME PRÊT
+            </div>
+
+            <h2>
+                Transforme tes mots
+                <br>
+                <span>en voix.</span>
+            </h2>
+
+            <p>
+                Écris, parle, traduis et écoute ton texte
+                avec une interface futuriste.
+            </p>
+
+        </section>
+
+
+        <!-- ZONE PRINCIPALE -->
+
+        <section class="workspace">
+
+
+            <!-- TEXTE -->
+
+            <div class="card editor">
+
+                <div class="card-header">
+
+                    <div>
+                        <small>TEXTE</small>
+                        <h3>Ton message</h3>
+                    </div>
+
+                    <span id="charCount">
+                        0 caractères
+                    </span>
+
+                </div>
+
+
+                <textarea
+                    id="text"
+                    maxlength="5000"
+                    placeholder="✍️ Écris ton texte ici ou utilise le microphone..."
+                ></textarea>
+
+
+                <div class="editor-buttons">
+
+                    <button id="micButton">
+                        🎤 Parler
+                    </button>
+
+                    <button id="clearButton">
+                        🗑️ Effacer
+                    </button>
+
+                    <button id="saveButton">
+                        💾 Sauvegarder
+                    </button>
+
+                </div>
+
+
+                <div id="micStatus"></div>
+
+            </div>
+
+
+
+            <!-- COLONNE DROITE -->
+
+            <div class="right-column">
+
+
+                <!-- VOIX -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <small>VOIX</small>
+                            <h3>Lecture vocale</h3>
+                        </div>
+
+                        <span class="online"></span>
+
+                    </div>
+
+
+                    <label>
+                        Choisir une voix
+                    </label>
+
+                    <select id="voice">
+                    </select>
+
+
+                    <div class="range">
+
+                        <div>
+
+                            <label>
+                                ⚡ Vitesse
+                            </label>
+
+                            <input
+                                id="speed"
+                                type="range"
+                                min="0.5"
+                                max="2"
+                                step="0.1"
+                                value="1"
+                            >
+
+                        </div>
+
+                        <strong id="speedValue">
+                            1.0×
+                        </strong>
+
+                    </div>
+
+
+                    <div class="range">
+
+                        <div>
+
+                            <label>
+                                🔊 Volume
+                            </label>
+
+                            <input
+                                id="volume"
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.05"
+                                value="1"
+                            >
+
+                        </div>
+
+                        <strong id="volumeValue">
+                            100%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="range">
+
+                        <div>
+
+                            <label>
+                                🎵 Hauteur
+                            </label>
+
+                            <input
+                                id="pitch"
+                                type="range"
+                                min="0.5"
+                                max="2"
+                                step="0.1"
+                                value="1"
+                            >
+
+                        </div>
+
+                        <strong id="pitchValue">
+                            1.0
+                        </strong>
+
+                    </div>
+
+                    <div class="deep-voice-row">
+
+                        <div>
+                            <label>
+                                🎧 Voix profonde
+                            </label>
+                        </div>
+
+                        <button
+                            id="deepVoiceButton"
+                            type="button"
+                            class="deep-button"
+                        >
+                            Activer
+                        </button>
+
+                        <strong id="deepVoiceValue">
+                            Off
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TRADUCTION -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <small>TRADUCTION</small>
+                            <h3>Changer de langue</h3>
+                        </div>
+
+                    </div>
+
+
+                    <div class="languages">
+
+                        <select id="sourceLang">
+
+                            <option value="fr">
+                                🇫🇷 Français
+                            </option>
+
+                            <option value="ar">
+                                🇩🇿 Arabe
+                            </option>
+
+                            <option value="en">
+                                🇬🇧 Anglais
+                            </option>
+
+                            <option value="es">
+                                🇪🇸 Espagnol
+                            </option>
+
+                            <option value="de">
+                                🇩🇪 Allemand
+                            </option>
+
+                            <option value="it">
+                                🇮🇹 Italien
+                            </option>
+
+                        </select>
+
+
+                        <button
+                            id="swapLangButton"
+                            class="swap"
+                        >
+                            ⇄
+                        </button>
+
+
+                        <select id="targetLang">
+
+                            <option value="ar">
+                                🇩🇿 Arabe
+                            </option>
+
+                            <option value="fr">
+                                🇫🇷 Français
+                            </option>
+
+                            <option value="en">
+                                🇬🇧 Anglais
+                            </option>
+
+                            <option value="es">
+                                🇪🇸 Espagnol
+                            </option>
+
+                            <option value="de">
+                                🇩🇪 Allemand
+                            </option>
+
+                            <option value="it">
+                                🇮🇹 Italien
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <button
+                        id="translateButton"
+                        class="translate"
+                    >
+                        🌍 Traduire le texte
+                    </button>
+
+
+                    <div id="translationStatus"></div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- CONTROLES -->
+
+        <section class="card action-card">
+
+            <div class="actions">
+
+                <button
+                    id="speakButton"
+                    class="main-button"
+                >
+                    ▶️ Lire
+                </button>
+
+
+                <button
+                    id="pauseButton"
+                    class="pause-button"
+                >
+                    ⏸️ Pause
+                </button>
+
+
+                <button
+                    id="stopButton"
+                    class="stop-button"
+                >
+                    ⏹️ Arrêter
+                </button>
+
+            </div>
+
+
+            <div id="statusText" class="status">
+                <span></span>
+                Prêt à parler
+            </div>
+
+        </section>
+
+
+
+        <!-- HISTORIQUE -->
+
+        <section class="card history">
+
+            <div class="card-header">
+
+                <div>
+                    <small>MÉMOIRE LOCALE</small>
+                    <h3>Historique</h3>
+                </div>
+
+                <button
+                    id="clearHistoryButton"
+                    class="delete-history"
+                >
+                    Tout effacer
+                </button>
+
+            </div>
+
+
+            <div id="historyList">
+
+                <div class="empty">
+                    Aucun texte sauvegardé pour le moment.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <footer>
+            VOXIA V2 • Les textes restent dans ton navigateur.
+        </footer>
+
+    </main>
+
+
+
+    <!-- PANNEAU REGLAGES -->
+
+    <div
+        id="settingsPanel"
+        class="settings-panel"
+    >
+
+        <div class="settings card">
+
+            <div class="card-header">
+
+                <div>
+                    <small>CONFIGURATION</small>
+                    <h3>Réglages</h3>
+                </div>
+
+                <button
+                    id="closeSettingsButton"
+                    class="icon-button"
+                >
+                    ✕
+                </button>
+
+            </div>
+
+
+            <label class="setting">
+
+                <span>
+                    Lecture automatique après traduction
+                </span>
+
+                <input
+                    id="autoSpeak"
+                    type="checkbox"
+                >
+
+            </label>
+
+
+            <label class="settings">
+
+                <span>
+                    Animations
+                </span>
+
+                <input
+                    id="animations"
+                    type="checkbox"
+                    checked
+                >
+
+            </label>
+
+
+            <p class="note">
+                Le microphone et la synthèse vocale utilisent
+                les fonctions de ton navigateur.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
