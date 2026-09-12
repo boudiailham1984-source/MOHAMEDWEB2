@@ -37,75 +37,8 @@ const deepVoiceValue =
 const voiceProfile =
     document.getElementById("voiceProfile");
 
-let voiceProfileValue = "original";
-
-// Noms souvent utilisés par les moteurs pour des voix masculines.
-// La disponibilité dépend du navigateur et des voix installées.
-const likelyMaleNames = [
-    "henri", "paul", "thomas", "daniel", "pierre",
-    "nicolas", "jean", "antoine", "luc", "marc",
-    "male", "homme", "male voice"
-];
-
-function findLikelyMaleVoice() {
-    return voices.findIndex(voice => {
-        const name = (voice.name || "").toLowerCase();
-        return likelyMaleNames.some(key => name.includes(key));
-    });
-}
-
-function applyVoiceProfile(profile) {
-    voiceProfileValue = profile;
-
-    if (profile === "original") {
-        deepVoiceEnabled = false;
-        pitch.value = "1";
-        speed.value = "1";
-        volume.value = "1";
-    }
-
-    if (profile === "homme") {
-        deepVoiceEnabled = false;
-        const maleIndex = findLikelyMaleVoice();
-
-        if (maleIndex >= 0) {
-            voiceSelect.value = String(maleIndex);
-        }
-
-        pitch.value = "0.85";
-        speed.value = "0.95";
-        volume.value = "1";
-    }
-
-    if (profile === "homme-profond") {
-        deepVoiceEnabled = true;
-        const maleIndex = findLikelyMaleVoice();
-
-        if (maleIndex >= 0) {
-            voiceSelect.value = String(maleIndex);
-        }
-
-        pitch.value = "0.55";
-        speed.value = "0.92";
-        volume.value = "0.95";
-    }
-
-    if (profile === "grave") {
-        deepVoiceEnabled = true;
-        pitch.value = "0.65";
-        speed.value = "0.9";
-        volume.value = "0.95";
-    }
-
-    pitchValue.textContent = Number(pitch.value).toFixed(1);
-    speedValue.textContent = `${Number(speed.value).toFixed(1)}×`;
-    volumeValue.textContent =
-        `${Math.round(Number(volume.value) * 100)}%`;
-
-    updateDeepVoiceUI();
-}
-
-
+const voiceProfileStatus =
+    document.getElementById("voiceProfileStatus");
 
 const charCount =
     document.getElementById("charCount");
@@ -189,8 +122,28 @@ const statusText =
 let voices = [];
 let deepVoiceEnabled = false;
 
-function updateDeepVoiceUI() {
+let voiceProfileName = "original";
 
+// Les noms varient selon Android, Chrome et le moteur vocal.
+// On cherche des indices connus, sans supposer que "female/male" est
+// une propriété standard de SpeechSynthesisVoice.
+const maleVoiceHints = [
+    "male", "homme", "man", "male voice",
+    "thomas", "paul", "pierre", "jean", "henri",
+    "daniel", "nicolas", "antoine", "luc", "marc",
+    "george", "david", "james", "alex", "antoine"
+];
+
+function isLikelyMaleVoice(voice) {
+    const name = `${voice.name || ""} ${voice.voiceURI || ""}`.toLowerCase();
+    return maleVoiceHints.some(hint => name.includes(hint));
+}
+
+function findLikelyMaleVoice() {
+    return voices.find(isLikelyMaleVoice) || null;
+}
+
+function updateDeepVoiceUI() {
     deepVoiceButton.textContent =
         deepVoiceEnabled ? "Désactiver" : "Activer";
 
@@ -203,76 +156,136 @@ function updateDeepVoiceUI() {
     );
 }
 
+function setVoiceProfileStatus(message) {
+    if (voiceProfileStatus) {
+        voiceProfileStatus.textContent = message || "";
+    }
+}
 
-function loadVoices() {
+function selectVoiceObject(voice) {
+    const index = voices.indexOf(voice);
+    if (index >= 0) {
+        voiceSelect.value = String(index);
+        return true;
+    }
+    return false;
+}
 
-    voices =
-        speechSynthesis.getVoices();
+function applyVoiceProfile(profile, showStatus = true) {
+    voiceProfileName = profile || "original";
 
-    voiceSelect.innerHTML = "";
+    if (voiceProfileName === "homme" ||
+        voiceProfileName === "homme-profond") {
 
+        const maleVoice = findLikelyMaleVoice();
 
-    if (voices.length === 0) {
+        if (maleVoice) {
+            selectVoiceObject(maleVoice);
 
-        const option =
-            document.createElement("option");
+            // On modifie aussi légèrement la hauteur pour renforcer
+            // le rendu grave, sans prétendre créer une nouvelle voix.
+            if (voiceProfileName === "homme-profond") {
+                pitch.value = "0.55";
+                speed.value = "0.95";
+            } else {
+                pitch.value = "0.8";
+                speed.value = "1";
+            }
 
-        option.textContent =
-            "Aucune voix détectée";
-
-        voiceSelect.appendChild(option);
-
+            if (showStatus) {
+                setVoiceProfileStatus(
+                    `Voix sélectionnée : ${maleVoice.name}`
+                );
+            }
+        } else {
+            // Aucun vrai timbre masculin n'est exposé par le navigateur.
+            // On ne remplace pas silencieusement la voix choisie.
+            if (showStatus) {
+                setVoiceProfileStatus(
+                    "Aucune voix homme détectée sur cet appareil. Ajoute une voix masculine dans les réglages de synthèse vocale Android."
+                );
+            }
+        }
         return;
     }
 
+    setVoiceProfileStatus("");
+}
 
-    voices.forEach(
-        (voice, index) => {
+function loadVoices() {
+    voices = speechSynthesis.getVoices();
 
-            const option =
-                document.createElement(
-                    "option"
-                );
+    const previousValue = voiceSelect.value;
+    voiceSelect.innerHTML = "";
 
-            option.value = index;
+    if (voices.length === 0) {
+        const option = document.createElement("option");
+        option.textContent = "Aucune voix détectée";
+        voiceSelect.appendChild(option);
+        return;
+    }
 
-            option.textContent =
-                `${voice.name} — ${voice.lang}`;
+    voices.forEach((voice, index) => {
+        const option = document.createElement("option");
+        option.value = String(index);
+        option.textContent = `${voice.name} — ${voice.lang}`;
+        voiceSelect.appendChild(option);
+    });
 
-            voiceSelect.appendChild(
-                option
-            );
-        }
-    );
-
-
-    // Priorité au français
-
-    const frenchVoice =
-        voices.findIndex(
-            voice =>
-                voice.lang
-                    .toLowerCase()
-                    .startsWith("fr")
+    // Conserver la voix précédemment choisie si elle existe encore.
+    if (previousValue !== "" &&
+        voices[Number(previousValue)]) {
+        voiceSelect.value = previousValue;
+    } else {
+        const frenchVoice = voices.findIndex(
+            voice => (voice.lang || "")
+                .toLowerCase()
+                .startsWith("fr")
         );
 
-
-    if (frenchVoice >= 0) {
-
         voiceSelect.value =
-            frenchVoice;
+            frenchVoice >= 0 ? String(frenchVoice) : "0";
+    }
+
+    // Si l'utilisateur a demandé Homme, réappliquer après voiceschanged.
+    if (voiceProfileName !== "original") {
+        applyVoiceProfile(voiceProfileName, true);
     }
 }
 
-
 if ("speechSynthesis" in window) {
-
-    speechSynthesis.onvoiceschanged =
-        loadVoices;
-
+    speechSynthesis.onvoiceschanged = loadVoices;
     loadVoices();
 }
 
+if (voiceProfile) {
+    voiceProfile.addEventListener("change", function () {
+        applyVoiceProfile(this.value, true);
+
+        if (this.value === "homme" ||
+            this.value === "homme-profond") {
+            deepVoiceEnabled =
+                this.value === "homme-profond";
+            updateDeepVoiceUI();
+        } else {
+            deepVoiceEnabled = false;
+            updateDeepVoiceUI();
+        }
+
+        updateCounter();
+    });
+}
+
+voiceSelect.addEventListener("change", function () {
+    // Une sélection manuelle doit être prioritaire.
+    if (voiceProfile) {
+        voiceProfile.value = "original";
+    }
+    voiceProfileName = "original";
+    deepVoiceEnabled = false;
+    updateDeepVoiceUI();
+    setVoiceProfileStatus("");
+});
 
 // ==========================================
 // STATUT
@@ -374,12 +387,16 @@ function speakText() {
 
     let finalPitch = Number(pitch.value);
 
-    if (voiceProfileValue === "homme-profond") {
-        finalPitch = Math.min(finalPitch, 0.55);
-    } else if (voiceProfileValue === "grave") {
-        finalPitch = Math.min(finalPitch, 0.65);
-    } else if (deepVoiceEnabled) {
+    if (deepVoiceEnabled) {
         finalPitch = Math.min(finalPitch, 0.7);
+    }
+
+    if (voiceProfileName === "homme") {
+        finalPitch = Math.min(finalPitch, 0.8);
+    }
+
+    if (voiceProfileName === "homme-profond") {
+        finalPitch = Math.min(finalPitch, 0.55);
     }
 
     utterance.pitch = finalPitch;
@@ -568,21 +585,6 @@ pitch.addEventListener(
 );
 
 
-if (voiceProfile) {
-    voiceProfile.addEventListener("change", function () {
-        applyVoiceProfile(voiceProfile.value);
-        setStatus(
-            voiceProfile.value === "homme-profond"
-                ? "🕶️ Voix homme profonde sélectionnée"
-                : voiceProfile.value === "homme"
-                    ? "👨 Voix homme sélectionnée"
-                    : voiceProfile.value === "grave"
-                        ? "🎧 Voix grave sélectionnée"
-                        : "🟢 Voix originale"
-        );
-    });
-}
-
 deepVoiceButton.addEventListener(
     "click",
     function () {
@@ -595,18 +597,23 @@ deepVoiceButton.addEventListener(
             pitchValue.textContent = "0.7";
             volume.value = "0.85";
             volumeValue.textContent = "85%";
+
+            if (voiceProfile) {
+                voiceProfile.value = "homme-profond";
+            }
+            voiceProfileName = "homme-profond";
+            applyVoiceProfile("homme-profond", true);
         } else {
             pitch.value = "1";
             pitchValue.textContent = "1.0";
             volume.value = "1";
             volumeValue.textContent = "100%";
-        }
 
-        if (voiceProfile) {
-            voiceProfile.value = deepVoiceEnabled
-                ? "grave"
-                : "original";
-            voiceProfileValue = voiceProfile.value;
+            if (voiceProfile) {
+                voiceProfile.value = "original";
+            }
+            voiceProfileName = "original";
+            setVoiceProfileStatus("");
         }
 
         updateDeepVoiceUI();
