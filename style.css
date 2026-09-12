@@ -243,6 +243,31 @@ body {
     background: rgba(255,255,255,.12);
 }
 
+.voice-profile-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+}
+
+.voice-profile-row > div {
+    flex: 1;
+}
+
+.voice-help {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 4px;
+}
+
+.voice-profile {
+    width: min(210px, 48%);
+}
+
 .deep-voice-row {
 
     display: flex;
@@ -1138,5 +1163,16 @@ body.light .history-item {
     .history-item {
 
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .voice-profile-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .voice-profile {
+        width: 100%;
     }
 }
